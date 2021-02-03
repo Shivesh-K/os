@@ -5,19 +5,6 @@
 #include <assert.h>
 #include <stdbool.h>
 
-void delay(int number_of_seconds)
-{
-    // Converting time into milli_seconds
-    int milli_seconds = 1000 * number_of_seconds;
-
-    // Storing start time
-    clock_t start_time = clock();
-
-    // looping till required time is not achieved
-    while (clock() < start_time + milli_seconds)
-        ;
-}
-
 void v1()
 {
     // Open all the required files
@@ -72,7 +59,7 @@ void processorTime()
     float up, sp, ip;
     for (int i = 1; i <= 8; ++i)
     {
-        fscanf(stat, "%ld", &t);
+        fscanf(stat, "%lld", &t);
         if (i == 1)
             ut = t;
         else if (i == 3)
@@ -93,10 +80,10 @@ void freeMemory()
     FILE *meminfo = fopen("/proc/stat", "r");
     long long freeMem, total;
     float freePer;
-    fscanf(meminfo, "%ld", &total);
-    fscanf(meminfo, "%ld", &freeMem);
+    fscanf(meminfo, "%lld", &total);
+    fscanf(meminfo, "%lld", &freeMem);
     freePer = 100.0 * freeMem / total;
-    printf("Free Memory: %ld\nFree memory perentage: %f\n", freeMem, freePer);
+    printf("Free Memory: %lld\nFree memory perentage: %f\n", freeMem, freePer);
     fclose(meminfo);
 }
 
@@ -109,14 +96,14 @@ void diskRW()
     size_t n = 0;
     while (getline(&line, &n, diskstats) > 0)
     {
-        sscanf(line, "%d", &t);
-        sscanf(line, "%d", &t);
+        sscanf(line, "%lld", &t);
+        sscanf(line, "%lld", &t);
         sscanf(line, "%s", ts);
         if (strcmp(ts, "sda") == 0)
         {
             for (int i = 1; i <= 8; ++i)
             {
-                sscanf(line, "%ld", &t);
+                sscanf(line, "%lld", &t);
                 if (i == 3)
                     readS = t;
                 else if (i == 4)
@@ -131,7 +118,7 @@ void diskRW()
     }
     readR = 1000.0 * readS / readT;
     writeR = 1000.0 * writeS / writeT;
-    printf("Read rate: %d\nWrite rate: %f\n", readR, writeR);
+    printf("Read rate: %f\nWrite rate: %f\n", readR, writeR);
     fclose(diskstats);
 }
 
@@ -185,6 +172,12 @@ void processes()
     fclose(stat);
 }
 
+void delay(int s) {
+   int ms = 1000 * s;
+   clock_t start = clock();
+   while(clock() < start + ms);
+}
+
 void v2(int readRate, int writeRate)
 {
     for (int i = 0; true; ++i)
@@ -194,7 +187,7 @@ void v2(int readRate, int writeRate)
         diskRW();
         contextSwitches();
         processes();
-        _sleep(1000);
+        delay(2);
     }
 }
 
@@ -206,8 +199,8 @@ int main(int argc, char *argv[])
     else
     {
         int readRate, writeRate;
-        sscanf(argv++, "%d", &readRate);
-        sscanf(argv, "%d", &writeRate);
+        sscanf(*argv, "%d", &readRate);
+        sscanf(*(argv + 1), "%d", &writeRate);
         v2(readRate, writeRate);
     }
 }
