@@ -20,12 +20,13 @@ void v1()
     assert(uptime != NULL);
 
     size_t n = 0;
-    char *line = NULL;
+    char line[100];
     double time = 0;
 
     // Print cpu model name
-    while (getline(&line, &n, cpuinfo) > 0)
+    while (!feof(cpuinfo))
     {
+        fscanf(cpuinfo, "%[^\n]", line);
         if (strstr(line, "model name"))
         {
             printf("%s\n", line);
@@ -34,18 +35,17 @@ void v1()
     }
 
     // Print kernel version
-    getline(&line, &n, version);
+    fscanf(version, "%[^\n]", line);
     printf("%s\n", line);
 
     // Print kernel version
-    getline(&line, &n, meminfo);
+    fscanf(meminfo, "%[^\n]", line);
     printf("%s\n", line);
 
     // Print uptime since boot
-    fscanf(uptime, "%lf", &time);
+    fscanf(uptime, "%[^\n]", line);
     printf("The uptime since boot is %f\n", time);
 
-    free(line);
     fclose(cpuinfo);
     fclose(version);
     fclose(meminfo);
@@ -92,10 +92,11 @@ void diskRW()
     FILE *diskstats = fopen("/proc/diskstats", "r");
     long long readS, readT, writeS, writeT, t;
     float readR, writeR;
-    char *line = NULL, *ts;
+    char line[100], ts[100];
     size_t n = 0;
-    while (getline(&line, &n, diskstats) > 0)
+    while (!feof(diskstats))
     {
+        fscanf(diskstats, "%[^\n]", line);
         sscanf(line, "%lld", &t);
         sscanf(line, "%lld", &t);
         sscanf(line, "%s", ts);
@@ -127,11 +128,11 @@ void contextSwitches()
     FILE *stat = fopen("/proc/stat", "r");
     long long switches, time;
     double rate;
-    char *line = NULL;
-    char t[10];
+    char line[100], t[10];
     size_t n = 0;
-    while (getline(&line, &n, stat) > 0)
+    while (!feof(stat))
     {
+        fscanf(stat, "%[^\n]", line);
         sscanf(line, "%s", t);
         if (strcmp(t, "ctxt") == 0)
         {
@@ -152,11 +153,11 @@ void processes()
     FILE *stat = fopen("/proc/stat", "r");
     long long process, time;
     double rate;
-    char *line = NULL;
-    char t[10];
+    char line[100], t[10];
     size_t n = 0;
-    while (getline(&line, &n, stat) > 0)
+    while (!feof(stat))
     {
+        fscanf(stat, "%[^\n]", line);
         sscanf(line, "%s", t);
         if (strcmp(t, "processes") == 0)
         {
@@ -172,10 +173,12 @@ void processes()
     fclose(stat);
 }
 
-void delay(int s) {
-   int ms = 1000 * s;
-   clock_t start = clock();
-   while(clock() < start + ms);
+void delay(int s)
+{
+    int ms = 1000 * s;
+    clock_t start = clock();
+    while (clock() < start + ms)
+        ;
 }
 
 void v2(int readRate, int writeRate)
