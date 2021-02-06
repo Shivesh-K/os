@@ -1,45 +1,76 @@
-#include <unistd.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <string.h>
 
-#define PRMTSIZ 255
-#define MAXARGS 63
-#define EXITCMD "exit"
+#define INPUT_LEN 1024
 
-int main(void) {
-    for (;;) {
-        char input[PRMTSIZ + 1] = { 0x0 };
-        char *ptr = input;
-        char *args[MAXARGS + 1] = { NULL };
-        int wstatus;
+void parseCmd(char cmd[], char *par[])
+{
+	char line[INPUT_LEN];
+	int count = 0, i = 0, j = 0;
+	char *array[100], *pch;
 
-        // prompt
-        printf("%s ", getuid() == 0 ? "#" : "$");
-        fgets(input, PRMTSIZ, stdin);
+	while (true)
+	{
+		int c = fgetc(stdin);
+		line[count++] = (char)c;
+		if (c == '\n')
+			break;
+	}
 
-        // ignore empty input
-        if (*ptr == '\n') continue;
+	if (count == 1)
+		return;
+	pch = strtok(line, " \n");
 
-        // convert input line to list of arguments
-        for (int i = 0; i < sizeof(args) && *ptr; ptr++) {
-            if (*ptr == ' ') continue;
-            if (*ptr == '\n') break;
-            for (args[i++] = ptr; *ptr && *ptr != ' ' && *ptr != '\n'; ptr++);
-            *ptr = '\0';
-        }
+	while (pch != NULL)
+	{
+		array[i++] = strdup(pch);
+		pch = strtok(NULL, " \n");
+	}
 
-        // built-in: exit
-        if (strcmp(EXITCMD, args[0]) == 0) return 0;
+	strcpy(cmd, array[0]);
 
-        // fork child and execute program
-        signal(SIGINT, SIG_DFL);
-        if (fork() == 0) exit(execvp(args[0], args));
-        signal(SIGINT, SIG_IGN);
+	for (int j = 0; j < i; ++j)
+	{
+		par[j] = array[j];
+	}
+	par[i] = NULL;
+}
 
-        // wait for program to finish and print exit status
-        wait(&wstatus);
-        if (WIFEXITED(wstatus)) printf("<%d>", WEXITSTATUS(wstatus));
-    }
+int main()
+{
+	char cmd[100], cmd[100], *parameters[20];
+	int error = 1;
+
+	while (true)
+	{
+		printf("$ ");
+		parseCmd(cmd, parameters);
+
+		if (fork() != 0)
+		{
+			wait(NULL);
+		}
+		else
+		{
+			strcpy(cmd, "/bin/");
+			strcat(cmd, cmd);
+
+			if (!strncmp(cmd, "cd", 2))
+				chdir(parameters[1]);
+			else
+				error = execvp(cmd, parameters);
+		}
+
+		if (strcmp(cmd, "exit") == 0)
+			return 0;
+
+		if (error < 0)
+			printf("Invalid Command \n\n");
+	}
+
+	return 0;
 }
