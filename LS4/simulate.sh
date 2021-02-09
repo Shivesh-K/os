@@ -17,7 +17,7 @@ done
 # If the number of 'All's is greater than 1, then exit
 if [ $C -gt 1 ] 
 then
-    echo "'All' can be used atmost 1 time. Was used $C times."
+    echo "ERROR: 'All' can be used atmost 1 time. Was used $C times."
     exit 1
 fi
 
