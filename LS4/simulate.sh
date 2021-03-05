@@ -10,7 +10,7 @@ do
         # Increment everythime there is an 'All'
         ((C=C+1))
         # Store the index at which it appers
-        ((IDX=$i))
+        IDX=$i
     fi
 done
 
@@ -37,26 +37,25 @@ declare -a POLICIES=("FIFO" "NRU" "LRU" "Opt")
 case "$IDX" in
     "1") 
         for i in "${PRBLM_SIZES[@]}"
-        do 
-            echo $i
+        do
             bash ./simulate101.sh "$i" "$2" "$3" "$4"
         done
     ;;
     "2") 
         for i in "${PG_FRM_SIZES[@]}"
-        do 
+        do
             bash ./simulate101.sh "$1" "$i" "$3" "$4"
         done
     ;;
     "3") 
         for i in "${PG_FRM_COUNTS[@]}"
-        do 
+        do
             bash ./simulate101.sh "$1" "$2" "$i" "$4"
         done
     ;;
     "4") 
         for i in "${POLICIES[@]}"
-        do 
+        do
             bash ./simulate101.sh "$1" "$2" "$3" "$i"
         done
     ;;
