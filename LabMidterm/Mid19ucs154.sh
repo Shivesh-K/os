@@ -1,3 +1,6 @@
+# Shivesh Kaundinya
+# 19ucs154
+
 if ! ([ "$1" = "3000" ] || [ "$1" = "5000" ])
 then
     exit 1
@@ -30,3 +33,47 @@ echo $LastName, $FirstName
 
 gcc -o nameSorter nameSorter.c
 ./nameSorter $1 listnames >names$1.txt
+
+File=names$1.txt
+
+LastNameCount=0
+while read -r line
+do
+    s="$line"
+    if [[ "$s" == *"$LastName" ]]
+    then
+        ((LastNameCount=LastNameCount+1))
+    fi
+done < "$File"
+
+FirstNameCount=0
+while read -r line
+do
+    s="$line"
+    if [[ "$s" == "$FirstName"* ]]
+    then
+        ((FirstNameCount=FirstNameCount+1))
+    fi
+done < "$File"
+
+AnyCount=0
+while read -r line
+do
+    s="$line"
+    if [[ "$s" == "$FirstName"* ]] || [[ "$s" == *"$LastName" ]]
+    then
+        ((AnyCount=AnyCount+1))
+    fi
+done < "$File"
+
+NoneCount=0
+while read -r line
+do
+    s="$line"
+    if ( ! [[ "$s" == "$FirstName"* ]] && ! [[ "$s" == *"$LastName" ]] )
+    then
+        ((NoneCount=NoneCount+1))
+    fi
+done < "$File"
+
+echo $FirstNameCount $LastNameCount $AnyCount $NoneCount
